@@ -40,18 +40,18 @@ def aggregate(df, by, num_stats=("mean",), cat_stats=("count",), prefix=None):
         cat_df.columns = [prefix + col for col in flatten_multiindex_cols(cat_df.columns)]
 
     else:
-        print("No cat columns in df")
+        print("No categorical columns in df")
         cat_df = None
 
     if (num_df is None) and (cat_df is None):
         return None
 
     if num_df is None:
-        return cat_df
+        return cat_df.reset_index()
 
     if cat_df is None:
-        return num_df
+        return num_df.reset_index()
 
     merged_df = num_df.merge(cat_df, how="outer", left_index=True, right_index=True)
-    return merged_df
+    return merged_df.reset_index()
 
