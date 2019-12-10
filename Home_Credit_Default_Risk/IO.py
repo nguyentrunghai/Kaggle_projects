@@ -72,3 +72,18 @@ def feature_importance_df(estimator, features):
     feature_imp = pd.DataFrame({"feature": features, "importance": estimator.feature_importances_})
     feature_imp = feature_imp.sort_values(by=["importance"], ascending=False)
     return feature_imp
+
+
+def write_submit_csv(estimator, X_test, test_id_file, out):
+    """
+    :param estimator: a sklearn estimator that has predict_proba() method
+    :param X_test: df or array
+    :param test_id_file: str, csv file that contain index of test cases
+    :param out: str, csv output file name
+    :return: None
+    """
+    prob_test = estimator.predict_proba(X_test)[:, 1]
+    submit = pd.read_csv(test_id_file)
+    submit["TARGET"] = prob_test
+    submit.to_csv(out, index=False)
+    return None
