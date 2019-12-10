@@ -3,6 +3,7 @@ Define function to preprocess data
 """
 
 import pandas as pd
+import numpy as np
 
 
 def flatten_multiindex_cols(columns):
@@ -55,3 +56,29 @@ def aggregate(df, by, num_stats=("mean",), cat_stats=("count",), prefix=None):
     merged_df = num_df.merge(cat_df, how="outer", left_index=True, right_index=True)
     return merged_df.reset_index()
 
+
+def change_dtypes(df):
+    """
+    change types of columns to reduce memory size
+    :param df: dataframe
+    :return df: dataframe
+    """
+    memory = df.memory_usage().sum() / 10**6
+    print("Memory usage before changing types %0.2f MB" % memory)
+
+    for col in df.columns:
+        if (df[col].dtype == 'object') and (df[col].nunique() < df.shape[0]):
+            df[col] = df[col].astype('category')
+
+        elif list(df[col].unique()) == [1, 0]:
+            df[col] = df[col].astype(bool)
+
+        elif df[col].dtype == float:
+            df[col] = df[col].astype(np.float32)
+
+        elif df[col].dtype == int:
+            df[col] = df[col].astype(np.int32)
+
+    memory = df.memory_usage().sum() / 10 ** 6
+    print("Memory usage after changing types %0.2f MB" % memory)
+    return df
