@@ -94,3 +94,16 @@ def deal_with_days_employed_outlier(df):
     df[key + "_OUTLIER"] = df[key] == outlier_val
     df[key].replace({outlier_val: np.nan}, inplace=True)
     return df
+
+
+def onehot_encoding(X_train, X_test):
+    """
+    :param X_train: dataframe
+    :param X_test: dataframe
+    :return: (X_train_ohe, X_test_ohe)
+    """
+    X_train_ohe = pd.get_dummies(X_train)
+    X_test_ohe = pd.get_dummies(X_test)
+
+    X_train_ohe, X_test_ohe = X_train_ohe.align(X_test_ohe, join='inner', axis=1)
+    return X_train_ohe, X_test_ohe
