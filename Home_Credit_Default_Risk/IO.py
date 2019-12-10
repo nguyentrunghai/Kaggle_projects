@@ -2,7 +2,7 @@
 Define functions for data input/output
 """
 
-
+import pandas as pd
 import numpy as np
 
 
@@ -61,3 +61,14 @@ def print_col_desc(df, table_name, col_desc_df):
 
         print("-" * 50 + "\n")
     return None
+
+
+def feature_importance_df(estimator, features):
+    """
+    :param estimator: an estimator object that has feature_importances_ attribute
+    :param features: list of str, list of feature names
+    :return: feature_imp, dataframe
+    """
+    feature_imp = pd.DataFrame({"feature": features, "importance": estimator.feature_importances_})
+    feature_imp = feature_imp.sort_values(by=["importance"], ascending=False)
+    return feature_imp
