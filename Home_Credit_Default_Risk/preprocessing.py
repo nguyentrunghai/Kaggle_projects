@@ -25,7 +25,7 @@ def aggregate(df, by, num_stats=("mean",), cat_stats=("count",), prefix=None):
 
     cols_to_group = [df[col] for col in by]
 
-    num_df = df.drop(by, axis=1).select_dtypes('number')
+    num_df = df.drop(by, axis=1).select_dtypes("number")
     if num_df.shape[1] > 0:
         num_df = num_df.groupby(cols_to_group).agg(num_stats)
         num_df.columns = [prefix + col for col in flatten_multiindex_cols(num_df.columns)]
@@ -34,7 +34,7 @@ def aggregate(df, by, num_stats=("mean",), cat_stats=("count",), prefix=None):
         print("No numerical columns in df")
         num_df = None
 
-    cat_df = df.drop(by, axis=1).select_dtypes('object')
+    cat_df = df.drop(by, axis=1).select_dtypes(["object", "category"])
     if cat_df.shape[1] > 0:
         cat_df = pd.get_dummies(cat_df)
         cat_df = cat_df.groupby(cols_to_group).agg(cat_stats)
@@ -67,8 +67,8 @@ def change_dtypes(df):
     print("Memory usage before changing types %0.2f MB" % memory)
 
     for col in df.columns:
-        if (df[col].dtype == 'object') and (df[col].nunique() < df.shape[0]):
-            df[col] = df[col].astype('category')
+        if (df[col].dtype == "object") and (df[col].nunique() < df.shape[0]):
+            df[col] = df[col].astype("category")
 
         elif list(df[col].unique()) == [1, 0]:
             df[col] = df[col].astype(bool)
