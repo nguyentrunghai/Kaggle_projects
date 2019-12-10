@@ -82,3 +82,15 @@ def change_dtypes(df):
     memory = df.memory_usage().sum() / 10 ** 6
     print("Memory usage after changing types %0.2f MB" % memory)
     return df
+
+
+def deal_with_days_employed_outlier(df):
+    """
+    :param df: dataframe
+    :return df: data frame
+    """
+    key = "DAYS_EMPLOYED"
+    outlier_val = df[key].max()
+    df[key + "_OUTLIER"] = df[key] == outlier_val
+    df[key].replace({outlier_val: np.nan}, inplace=True)
+    return df
