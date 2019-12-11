@@ -74,16 +74,16 @@ def feature_importance_df(estimator, features):
     return feature_imp
 
 
-def write_submit_csv(estimator, X_test, test_id_file, out):
+def write_submit_csv(estimator, X_test, id_test, out):
     """
     :param estimator: a sklearn estimator that has predict_proba() method
     :param X_test: df or array
-    :param test_id_file: str, csv file that contain index of test cases
+    :param id_test: dataframe containing column "SK_ID_CURR"
     :param out: str, csv output file name
     :return: None
     """
     prob_test = estimator.predict_proba(X_test)[:, 1]
-    submit = pd.read_csv(test_id_file)
+    submit = id_test
     submit["TARGET"] = prob_test
     submit.to_csv(out, index=False)
     return None
