@@ -84,15 +84,15 @@ def change_dtypes(df):
     return df
 
 
-def deal_with_days_employed_outlier(df):
+def deal_with_abnormal_days_employed(df):
     """
     :param df: dataframe
     :return df: data frame
     """
     key = "DAYS_EMPLOYED"
-    outlier_val = df[key].max()
-    df[key + "_OUTLIER"] = df[key] == outlier_val
-    df[key].replace({outlier_val: np.nan}, inplace=True)
+    abnormal_val = df[key].max()
+    df[key + "_ABNORMAL"] = df[key] == abnormal_val
+    df[key].replace({abnormal_val: np.nan}, inplace=True)
     return df
 
 
