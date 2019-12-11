@@ -13,7 +13,7 @@ def grid_search(X_train, y_train, estimator_constructor, fixed_params, param_gri
     :param fixed_params: dict, hyperparameters which are kept fixed
     :param param_grid: dict, value grid of hyperparameters which are tunned
     :param scoring: str, scoring metric
-    :param cv: int
+    :param cv: int, or an instance of StratifiedKFold
     :return: best_estimator, best_params, best_score
     """
     estimator = estimator_constructor(**fixed_params)
