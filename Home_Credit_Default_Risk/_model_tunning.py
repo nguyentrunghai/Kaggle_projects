@@ -2,20 +2,26 @@
 Define functions to tune model
 """
 
-from sklearn.model_selection import GridSearchCV, RandomizedSearchCV
+from sklearn.model_selection import GridSearchCV
+from sklearn.model_selection import RandomizedSearchCV
+from sklearn.model_selection import StratifiedKFold
 
 
-def grid_search(estimator, X_train, y_train, params_grid, scoring, cv):
+def grid_search(estimator, X_train, y_train, params_grid, scoring, cv, random_state=None):
     """
     :param estimator: name of the class from which estimator is constructed
     :param X_train: dataframe or array, training input features
     :param y_train: arryay, training labels
-    :param params_grid: dict, value grid of hyperparameters which are tuned. They are passed to GridSearchCV
+    :param params_grid: dict, value grid of hyperparameters which are tuned.
     :param scoring: str, scoring metric
-    :param cv: int, or an instance of StratifiedKFold
+    :param cv: int
+    :param random_state: int
     :return: best_estimator, best_params, best_score
     """
-    gs = GridSearchCV(estimator=estimator, param_grid=params_grid, scoring=scoring,  cv=cv)
+    assert type(params_grid) == dict, "params_grid must be a dict"
+
+    kfold = StratifiedKFold(n_splits=cv, random_state=random_state)
+    gs = GridSearchCV(estimator=estimator, param_grid=params_grid, scoring=scoring,  cv=kfold)
     gs.fit(X_train, y_train)
 
     best_params = gs.best_params_
@@ -33,22 +39,26 @@ def grid_search(estimator, X_train, y_train, params_grid, scoring, cv):
     return results
 
 
-def randomized_search(estimator, X_train, y_train, params_dist, n_iter, scoring, cv, random_state=None):
+def randomized_search(estimator, X_train, y_train, params_grid, n_iter, scoring, cv, random_state=None):
     """
     :param estimator_constructor: an estimatore object which has fit, predict..., and other methods
     :param X_train: dataframe or array, training input features
     :param y_train: arryay, training labels
-    :param params_fixed: dict, hyperparameters which are kept fixed. They are passed to the constructor
+    :param params_grid: dict, value grid of hyperparameters which are tuned.
     :param n_iter: int
     :param scoring: str, scoring metric
     :param cv: int, or an instance of StratifiedKFold
     :param random_state: int or RandomState instance or None
     :return: best_estimator, best_params, best_score
     """
+    assert type(params_grid) == dict, "params_grid must be a dict"
+
+    kfold = StratifiedKFold(n_splits=cv, random_state=random_state)
+
     params = estimator.get_prarams()
 
-    rs = RandomizedSearchCV(estimator=estimator, param_distributions=params_dist,
-                            n_iter=n_iter, scoring=scoring, refit=False, cv=cv,
+    rs = RandomizedSearchCV(estimator=estimator, param_distributions=params_grid,
+                            n_iter=n_iter, scoring=scoring, refit=False, cv=kfold,
                             random_state=random_state)
     rs.fit(X_train, y_train)
 
