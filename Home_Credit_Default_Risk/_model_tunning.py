@@ -21,13 +21,13 @@ def grid_search(X_train, y_train, estimator_constructor,
     gs = GridSearchCV(estimator=estimator, param_grid=param_grid, scoring=scoring,  cv=cv)
     gs.fit(X_train, y_train)
 
+    best_params = gs.best_params_
+    print("Best parameters:", best_params)
+    
     best_estimator = gs.best_estimator_
     # fit best_estimator on whole training dataset
     best_estimator.fit(X_train, y_train)
     print("Best estimator:", best_estimator)
-
-    best_params = gs.best_params_
-    print("Best parameters:", best_params)
 
     best_score = gs.best_score_
     print("Best score:", best_score)
@@ -45,7 +45,7 @@ def randomized_search(X_train, y_train, estimator_constructor,
     :param y_train: arryay, training labels
     :param estimator_constructor: name of the class from which estimator is constructed
     :param params_fixed: dict, hyperparameters which are kept fixed. They are passed to the constructor
-    :param param_dist: dict, key are hyperparameter names, values are list of float ore a scipy distribution.
+    :param param_dist: dict, key are hyperparameter names, values are list of float or a scipy distribution.
                         They are passed to RandomizedSearchCV.
     :param n_iter: int
     :param scoring: str, scoring metric
@@ -60,13 +60,14 @@ def randomized_search(X_train, y_train, estimator_constructor,
                             random_state=random_state)
     rs.fit(X_train, y_train)
 
-    best_estimator = rs.best_estimator_
+    best_params = rs.best_params_
+    print("Best parameters:", best_params)
+
+    params_fixed.update(best_params)
+    best_estimator = estimator_constructor(**params_fixed)
     # fit best_estimator on whole training dataset
     best_estimator.fit(X_train, y_train)
     print("Best estimator:", best_estimator)
-
-    best_params = rs.best_params_
-    print("Best parameters:", best_params)
 
     best_score = rs.best_score_
     print("Best score:", best_score)
