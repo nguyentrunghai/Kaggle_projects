@@ -80,7 +80,7 @@ def randomized_search(estimator, X_train, y_train, params_grid, n_iter, scoring,
 
 
 def tune_n_estimators_w_early_stopping(estimator, X_train, y_train,
-                                       max_n_estimators=1000, eval_size=0.2,
+                                       max_n_estimators=5000, eval_size=0.2,
                                        eval_metric="roc_auc",
                                        early_stopping_rounds=50,
                                        random_state=None):
@@ -105,6 +105,8 @@ def tune_n_estimators_w_early_stopping(estimator, X_train, y_train,
     estimator.fit(X_train_s, y_train_s, eval_metric=eval_metric,
                   eval_set=eval_set, early_stopping_rounds=early_stopping_rounds)
 
+    params.update(dict(n_estimators=estimator.best_iteration))
+    estimator.set_params(**params)
     estimator.fit(X_train, y_train)
     return estimator
 
