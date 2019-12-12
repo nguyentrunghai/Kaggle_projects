@@ -5,6 +5,7 @@ Define functions to tune model
 from sklearn.model_selection import GridSearchCV
 from sklearn.model_selection import RandomizedSearchCV
 from sklearn.model_selection import StratifiedKFold
+from sklearn.model_selection import train_test_split
 
 
 def grid_search(estimator, X_train, y_train, params_grid, scoring, cv, random_state=None):
@@ -41,7 +42,7 @@ def grid_search(estimator, X_train, y_train, params_grid, scoring, cv, random_st
 
 def randomized_search(estimator, X_train, y_train, params_grid, n_iter, scoring, cv, random_state=None):
     """
-    :param estimator_constructor: an estimatore object which has fit, predict..., and other methods
+    :param estimator_constructor: an estimator object which has fit, predict..., and other methods
     :param X_train: dataframe or array, training input features
     :param y_train: arryay, training labels
     :param params_grid: dict, value grid of hyperparameters which are tuned.
@@ -76,4 +77,36 @@ def randomized_search(estimator, X_train, y_train, params_grid, n_iter, scoring,
 
     results = {"best_estimator": estimator, "best_params": best_params, "best_score": best_score}
     return results
+
+
+def tune_n_estimators_w_early_stopping(estimator, X_train, y_train,
+                                       max_n_estimators=1000, eval_size=0.2,
+                                       eval_metric="roc_auc",
+                                       early_stopping_rounds=50,
+                                       random_state=None):
+    """
+    :param estimator: an estimator object which has fit, predict..., and other methods
+    :param X_train: dataframe or array, training input features
+    :param y_train: arryay, training labels
+    :param max_n_estimators: int
+    :param eval_size: float, between 0 and 1
+    :param eval_metric: str
+    :param early_stopping_rounds: int
+    :return: estimator
+    """
+    X_train_s, X_eval, y_train_s, y_eval = train_test_split(X_train, y_train, test_size=eval_size,
+                                                            random_state=random_state)
+
+    params = estimator.get_params()
+    params.update(dict(n_estimators=max_n_estimators))
+    estimator.set_params(**params)
+
+    eval_set = [(X_eval, y_eval)]
+    estimator.fit(X_train_s, y_train_s, eval_metric=eval_metric,
+                  eval_set=eval_set, early_stopping_rounds=early_stopping_rounds)
+
+    estimator.fit(X_train, y_train)
+    return estimator
+
+
 
