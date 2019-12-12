@@ -55,7 +55,7 @@ def randomized_search(estimator, X_train, y_train, params_grid, n_iter, scoring,
 
     kfold = StratifiedKFold(n_splits=cv, random_state=random_state)
 
-    params = estimator.get_prarams()
+    params = estimator.get_params()
 
     rs = RandomizedSearchCV(estimator=estimator, param_distributions=params_grid,
                             n_iter=n_iter, scoring=scoring, refit=False, cv=kfold,
@@ -76,3 +76,4 @@ def randomized_search(estimator, X_train, y_train, params_grid, n_iter, scoring,
 
     results = {"best_estimator": estimator, "best_params": best_params, "best_score": best_score}
     return results
+
