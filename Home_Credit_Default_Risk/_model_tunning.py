@@ -11,8 +11,8 @@ def grid_search(X_train, y_train, estimator_constructor,
     :param X_train: dataframe or array, training input features
     :param y_train: arryay, training labels
     :param estimator_constructor: name of the class from which estimator is constructed
-    :param params_fixed: dict, hyperparameters which are kept fixed
-    :param param_grid: dict, value grid of hyperparameters which are tuned
+    :param params_fixed: dict, hyperparameters which are kept fixed. They are passed to the constructor
+    :param param_grid: dict, value grid of hyperparameters which are tuned. They are passed to GridSearchCV
     :param scoring: str, scoring metric
     :param cv: int, or an instance of StratifiedKFold
     :return: best_estimator, best_params, best_score
@@ -44,8 +44,9 @@ def randomized_search(X_train, y_train, estimator_constructor,
     :param X_train: dataframe or array, training input features
     :param y_train: arryay, training labels
     :param estimator_constructor: name of the class from which estimator is constructed
-    :param params_fixed: dict, hyperparameters which are kept fixed
-    :param param_dist: dict, key are hyperparameter names, values are list of float ore a scipy distribution
+    :param params_fixed: dict, hyperparameters which are kept fixed. They are passed to the constructor
+    :param param_dist: dict, key are hyperparameter names, values are list of float ore a scipy distribution.
+                        They are passed to RandomizedSearchCV.
     :param n_iter: int
     :param scoring: str, scoring metric
     :param cv: int, or an instance of StratifiedKFold
