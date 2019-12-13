@@ -31,17 +31,13 @@ def grid_search(estimator, X_train, y_train, params_grid, scoring, cv,
     gs.fit(X_train, y_train)
 
     best_params = gs.best_params_
-    print("Best parameters:\n", best_params)
-
     best_estimator = gs.best_estimator_
-    print("Best estimator:\n", best_estimator)
 
     # fit best_estimator on whole training data set
     if re_fit:
         best_estimator.fit(X_train, y_train)
 
     best_score = gs.best_score_
-    print("Best score:", best_score)
 
     results = {"best_estimator": best_estimator, "best_params": best_params, "best_score": best_score}
 
@@ -78,18 +74,15 @@ def randomized_search(estimator, X_train, y_train, params_grid, n_iter, scoring,
     rs.fit(X_train, y_train)
 
     best_params = rs.best_params_
-    print("Best parameters:", best_params)
 
     params.update(best_params)
     estimator.set_params(**params)
-    print("Best estimator:", estimator)
 
     # fit best_estimator on whole training data set
     if re_fit:
         estimator.fit(X_train, y_train)
 
     best_score = rs.best_score_
-    print("Best score:", best_score)
 
     results = {"best_estimator": estimator, "best_params": best_params, "best_score": best_score}
 
