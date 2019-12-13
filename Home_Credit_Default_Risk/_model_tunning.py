@@ -85,7 +85,8 @@ def tune_n_estimators_w_early_stopping(estimator, X_train, y_train,
                                        max_n_estimators=5000, eval_size=0.2,
                                        eval_metric="roc_auc",
                                        early_stopping_rounds=50,
-                                       random_state=None):
+                                       random_state=None,
+                                       pkl_out=None):
     """
     :param estimator: an estimator object which has fit, predict..., and other methods consistent with sklearn API
     :param X_train: dataframe or array, training input features
@@ -94,6 +95,8 @@ def tune_n_estimators_w_early_stopping(estimator, X_train, y_train,
     :param eval_size: float, between 0 and 1
     :param eval_metric: str
     :param early_stopping_rounds: int
+    :param random_state: int
+    :param pkl_out: str or None, pickle file name
     :return: estimator
     """
     X_train_s, X_eval, y_train_s, y_eval = train_test_split(X_train, y_train, test_size=eval_size,
@@ -110,6 +113,9 @@ def tune_n_estimators_w_early_stopping(estimator, X_train, y_train,
     params.update(dict(n_estimators=estimator.best_iteration))
     estimator.set_params(**params)
     estimator.fit(X_train, y_train)
+    
+    if pkl_out is not None:
+        pickle.dump(estimator, open(pkl_out, "wb"))
     return estimator
 
 
