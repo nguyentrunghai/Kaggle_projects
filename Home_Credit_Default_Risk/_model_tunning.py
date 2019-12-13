@@ -95,7 +95,7 @@ def randomized_search(estimator, X_train, y_train, params_grid, n_iter, scoring,
 
 def tune_n_estimators_w_early_stopping(estimator, X_train, y_train,
                                        max_n_estimators=5000, eval_size=0.2,
-                                       eval_metric="roc_auc",
+                                       eval_metric="auc",
                                        early_stopping_rounds=50,
                                        random_state=None, pkl_out=None):
     """
@@ -164,5 +164,5 @@ def grid_search_stepwise(estimator, X_train, y_train, params_grid_steps, scoring
 
     if pkl_out is not None:
         pickle.dump(results, open(pkl_out, "wb"))
-        
+
     return results
