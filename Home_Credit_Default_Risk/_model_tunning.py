@@ -134,7 +134,8 @@ def tune_n_estimators_w_early_stopping(estimator, X_train, y_train,
     return estimator
 
 
-def grid_search_stepwise(estimator, X_train, y_train, params_grid_steps, scoring, cv,
+def grid_search_stepwise(estimator, X_train, y_train, params_grid_steps,
+                         scoring="roc_auc", cv=5,
                          random_state=None, pkl_out=None):
     """
     :param estimator: an estimator object which has fit, predict..., and other methods consistent with sklearn API
