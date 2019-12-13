@@ -11,7 +11,7 @@ from sklearn.model_selection import train_test_split
 
 
 def grid_search(estimator, X_train, y_train, params_grid, scoring, cv,
-                random_state=None, pkl_out=None):
+                random_state=None, re_fit=False, pkl_out=None):
     """
     :param estimator: an estimator object which has fit, predict..., and other methods consistent with sklearn API
     :param X_train: dataframe or array, training input features
@@ -20,6 +20,7 @@ def grid_search(estimator, X_train, y_train, params_grid, scoring, cv,
     :param scoring: str, scoring metric
     :param cv: int
     :param random_state: int
+    :param re_fit: whether to fit on the whole train set
     :param pkl_out: str or None, pickle file name
     :return: best_estimator, best_params, best_score
     """
@@ -30,12 +31,14 @@ def grid_search(estimator, X_train, y_train, params_grid, scoring, cv,
     gs.fit(X_train, y_train)
 
     best_params = gs.best_params_
-    print("Best parameters:", best_params)
+    print("Best parameters:\n", best_params)
 
     best_estimator = gs.best_estimator_
-    # fit best_estimator on whole training dataset
-    best_estimator.fit(X_train, y_train)
-    print("Best estimator:", best_estimator)
+    print("Best estimator:\n", best_estimator)
+
+    # fit best_estimator on whole training data set
+    if re_fit:
+        best_estimator.fit(X_train, y_train)
 
     best_score = gs.best_score_
     print("Best score:", best_score)
@@ -49,7 +52,7 @@ def grid_search(estimator, X_train, y_train, params_grid, scoring, cv,
 
 
 def randomized_search(estimator, X_train, y_train, params_grid, n_iter, scoring, cv,
-                      random_state=None, pkl_out=None):
+                      random_state=None, re_fit=False, pkl_out=None):
     """
     :param estimator: an estimator object which has fit, predict... and other methods consistent with sklearn API
     :param X_train: dataframe or array, training input features
@@ -59,6 +62,7 @@ def randomized_search(estimator, X_train, y_train, params_grid, n_iter, scoring,
     :param scoring: str, scoring metric
     :param cv: int, or an instance of StratifiedKFold
     :param random_state: int or RandomState instance or None
+    :param re_fit: whether to fit on the whole train set
     :param pkl_out: str or None, pickle file name
     :return: best_estimator, best_params, best_score
     """
@@ -78,9 +82,11 @@ def randomized_search(estimator, X_train, y_train, params_grid, n_iter, scoring,
 
     params.update(best_params)
     estimator.set_params(**params)
-    # fit best_estimator on whole training data set
-    estimator.fit(X_train, y_train)
     print("Best estimator:", estimator)
+
+    # fit best_estimator on whole training data set
+    if re_fit:
+        estimator.fit(X_train, y_train)
 
     best_score = rs.best_score_
     print("Best score:", best_score)
@@ -164,6 +170,7 @@ def grid_search_stepwise(estimator, X_train, y_train, params_grid_steps,
         print("best_params:", estimator.get_params())
         best_params.append(estimator.get_params())
 
+    estimator.fit(X_train, y_train)
     results = {"best_estimator": estimator, "best_params": best_params, "best_scores": best_scores}
 
     if pkl_out is not None:
