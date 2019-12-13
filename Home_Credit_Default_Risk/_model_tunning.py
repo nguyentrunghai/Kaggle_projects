@@ -10,7 +10,8 @@ from sklearn.model_selection import StratifiedKFold
 from sklearn.model_selection import train_test_split
 
 
-def grid_search(estimator, X_train, y_train, params_grid, scoring, cv, random_state=None):
+def grid_search(estimator, X_train, y_train, params_grid, scoring, cv,
+                random_state=None, pkl_out=None):
     """
     :param estimator: an estimator object which has fit, predict..., and other methods consistent with sklearn API
     :param X_train: dataframe or array, training input features
@@ -19,6 +20,7 @@ def grid_search(estimator, X_train, y_train, params_grid, scoring, cv, random_st
     :param scoring: str, scoring metric
     :param cv: int
     :param random_state: int
+    :param pkl_out: str or None, pickle file name
     :return: best_estimator, best_params, best_score
     """
     assert type(params_grid) == dict, "params_grid must be a dict"
@@ -39,10 +41,15 @@ def grid_search(estimator, X_train, y_train, params_grid, scoring, cv, random_st
     print("Best score:", best_score)
 
     results = {"best_estimator": best_estimator, "best_params": best_params, "best_score": best_score}
+
+    if pkl_out is not None:
+        pickle.dump(results, open(pkl_out, "wb"))
+
     return results
 
 
-def randomized_search(estimator, X_train, y_train, params_grid, n_iter, scoring, cv, random_state=None):
+def randomized_search(estimator, X_train, y_train, params_grid, n_iter, scoring, cv,
+                      random_state=None, pkl_out=None):
     """
     :param estimator: an estimator object which has fit, predict... and other methods consistent with sklearn API
     :param X_train: dataframe or array, training input features
@@ -52,6 +59,7 @@ def randomized_search(estimator, X_train, y_train, params_grid, n_iter, scoring,
     :param scoring: str, scoring metric
     :param cv: int, or an instance of StratifiedKFold
     :param random_state: int or RandomState instance or None
+    :param pkl_out: str or None, pickle file name
     :return: best_estimator, best_params, best_score
     """
     assert type(params_grid) == dict, "params_grid must be a dict"
@@ -78,6 +86,10 @@ def randomized_search(estimator, X_train, y_train, params_grid, n_iter, scoring,
     print("Best score:", best_score)
 
     results = {"best_estimator": estimator, "best_params": best_params, "best_score": best_score}
+
+    if pkl_out is not None:
+        pickle.dump(results, open(pkl_out, "wb"))
+
     return results
 
 
@@ -85,8 +97,7 @@ def tune_n_estimators_w_early_stopping(estimator, X_train, y_train,
                                        max_n_estimators=5000, eval_size=0.2,
                                        eval_metric="roc_auc",
                                        early_stopping_rounds=50,
-                                       random_state=None,
-                                       pkl_out=None):
+                                       random_state=None, pkl_out=None):
     """
     :param estimator: an estimator object which has fit, predict..., and other methods consistent with sklearn API
     :param X_train: dataframe or array, training input features
@@ -113,15 +124,15 @@ def tune_n_estimators_w_early_stopping(estimator, X_train, y_train,
     params.update(dict(n_estimators=estimator.best_iteration))
     estimator.set_params(**params)
     estimator.fit(X_train, y_train)
-    
+
     if pkl_out is not None:
         pickle.dump(estimator, open(pkl_out, "wb"))
+
     return estimator
 
 
 def grid_search_stepwise(estimator, X_train, y_train, params_grid_steps, scoring, cv,
-                         random_state=None,
-                         pkl_out=None):
+                         random_state=None, pkl_out=None):
     """
     :param estimator: an estimator object which has fit, predict..., and other methods consistent with sklearn API
     :param X_train: dataframe or array, training input features
@@ -153,4 +164,5 @@ def grid_search_stepwise(estimator, X_train, y_train, params_grid_steps, scoring
 
     if pkl_out is not None:
         pickle.dump(results, open(pkl_out, "wb"))
+        
     return results
