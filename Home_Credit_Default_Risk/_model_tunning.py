@@ -97,6 +97,7 @@ def tune_n_estimators_w_early_stopping(estimator, X_train, y_train,
                                        max_n_estimators=5000, eval_size=0.2,
                                        eval_metric="auc",
                                        early_stopping_rounds=50,
+                                       verbose=False,
                                        random_state=None, pkl_out=None):
     """
     :param estimator: an estimator object which has fit, predict..., and other methods consistent with sklearn API
@@ -106,6 +107,7 @@ def tune_n_estimators_w_early_stopping(estimator, X_train, y_train,
     :param eval_size: float, between 0 and 1
     :param eval_metric: str
     :param early_stopping_rounds: int
+    :param verbose: bool
     :param random_state: int
     :param pkl_out: str or None, pickle file name
     :return: estimator
@@ -119,7 +121,8 @@ def tune_n_estimators_w_early_stopping(estimator, X_train, y_train,
 
     eval_set = [(X_eval, y_eval)]
     estimator.fit(X_train_s, y_train_s, eval_metric=eval_metric,
-                  eval_set=eval_set, early_stopping_rounds=early_stopping_rounds)
+                  eval_set=eval_set, early_stopping_rounds=early_stopping_rounds,
+                  verbose=verbose)
 
     params.update(dict(n_estimators=estimator.best_iteration))
     estimator.set_params(**params)
