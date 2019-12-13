@@ -155,12 +155,12 @@ def grid_search_stepwise(estimator, X_train, y_train, params_grid_steps,
         print("Doing grid search step %d" % step)
         results = grid_search(estimator, X_train, y_train, params_grid, scoring, cv, random_state=random_state)
 
-        print("best_score:", results["best_score"])
+        print("best_score:\n", results["best_score"])
         best_scores.append(results["best_score"])
 
         estimator = results["best_estimator"]
 
-        print("best_params:", estimator.get_params())
+        print("best_params:\n", estimator.get_params())
         best_params.append(estimator.get_params())
 
     estimator.fit(X_train, y_train)
