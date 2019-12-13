@@ -2,6 +2,8 @@
 Define functions to tune model
 """
 
+import pickle
+
 from sklearn.model_selection import GridSearchCV
 from sklearn.model_selection import RandomizedSearchCV
 from sklearn.model_selection import StratifiedKFold
@@ -111,7 +113,9 @@ def tune_n_estimators_w_early_stopping(estimator, X_train, y_train,
     return estimator
 
 
-def grid_search_stepwise(estimator, X_train, y_train, params_grid_steps, scoring, cv, random_state=None):
+def grid_search_stepwise(estimator, X_train, y_train, params_grid_steps, scoring, cv,
+                         random_state=None,
+                         pkl_out=None):
     """
     :param estimator: an estimator object which has fit, predict..., and other methods consistent with sklearn API
     :param X_train: dataframe or array, training input features
@@ -120,6 +124,7 @@ def grid_search_stepwise(estimator, X_train, y_train, params_grid_steps, scoring
     :param scoring: str
     :param cv: int
     :param random_state: int
+    :param pkl_out: str or None, pickle file name
     :return: estimator
     """
     assert type(params_grid_steps) == list, "params_grid_steps must be a list"
@@ -139,4 +144,7 @@ def grid_search_stepwise(estimator, X_train, y_train, params_grid_steps, scoring
         best_params.append(estimator.get_params())
 
     results = {"best_estimator": estimator, "best_params": best_params, "best_scores": best_scores}
+
+    if pkl_out is not None:
+        pickle.dump(results, open(pkl_out, "wb"))
     return results
