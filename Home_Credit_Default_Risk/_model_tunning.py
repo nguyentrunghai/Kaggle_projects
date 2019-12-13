@@ -10,7 +10,7 @@ from sklearn.model_selection import train_test_split
 
 def grid_search(estimator, X_train, y_train, params_grid, scoring, cv, random_state=None):
     """
-    :param estimator: name of the class from which estimator is constructed
+    :param estimator: an estimator object which has fit, predict..., and other methods consistent with sklearn API
     :param X_train: dataframe or array, training input features
     :param y_train: arryay, training labels
     :param params_grid: dict, value grid of hyperparameters which are tuned.
@@ -42,7 +42,7 @@ def grid_search(estimator, X_train, y_train, params_grid, scoring, cv, random_st
 
 def randomized_search(estimator, X_train, y_train, params_grid, n_iter, scoring, cv, random_state=None):
     """
-    :param estimator_constructor: an estimator object which has fit, predict..., and other methods
+    :param estimator: an estimator object which has fit, predict... and other methods consistent with sklearn API
     :param X_train: dataframe or array, training input features
     :param y_train: arryay, training labels
     :param params_grid: dict, value grid of hyperparameters which are tuned.
@@ -85,7 +85,7 @@ def tune_n_estimators_w_early_stopping(estimator, X_train, y_train,
                                        early_stopping_rounds=50,
                                        random_state=None):
     """
-    :param estimator: an estimator object which has fit, predict..., and other methods
+    :param estimator: an estimator object which has fit, predict..., and other methods consistent with sklearn API
     :param X_train: dataframe or array, training input features
     :param y_train: arryay, training labels
     :param max_n_estimators: int
@@ -111,4 +111,32 @@ def tune_n_estimators_w_early_stopping(estimator, X_train, y_train,
     return estimator
 
 
+def grid_search_stepwise(estimator, X_train, y_train, params_grid_steps, scoring, cv, random_state=None):
+    """
+    :param estimator: an estimator object which has fit, predict..., and other methods consistent with sklearn API
+    :param X_train: dataframe or array, training input features
+    :param y_train: arryay, training labels
+    :param params_grid_steps: list of dict
+    :param scoring: str
+    :param cv: int
+    :param random_state: int
+    :return: estimator
+    """
+    assert type(params_grid_steps) == list, "params_grid_steps must be a list"
 
+    best_scores = []
+    best_params = []
+    for step, params_grid in enumerate(params_grid_steps):
+        print("Doing grid search step %d" % step)
+        results = grid_search(estimator, X_train, y_train, params_grid, scoring, cv, random_state=random_state)
+
+        print("best_score:", results["best_score"])
+        best_scores.append(results["best_score"])
+
+        estimator = results["best_estimator"]
+
+        print("best_params:", estimator.get_params())
+        best_params.append(estimator.get_params())
+
+    results = {"best_estimator": estimator, "best_params": best_params, "best_scores": best_scores}
+    return results
