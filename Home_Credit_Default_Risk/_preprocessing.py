@@ -113,7 +113,7 @@ def onehot_encoding(X_train, X_test):
 class GeneralLabelEncoder:
     """
     sklearn LabelEncoder accepts only 1D array or pd Series.
-    This class wraps around sklearn LabelEncoder and can handle a array of categorical
+    This class wraps around sklearn LabelEncoder and can handle a 2d array of categoricals
     or a dataframe of mixed types both numeric and categorical
     """
     def __init__(self, fillna_value="NaN"):
