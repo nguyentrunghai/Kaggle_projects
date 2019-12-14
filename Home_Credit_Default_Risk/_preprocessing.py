@@ -116,12 +116,18 @@ class GeneralLabelEncoder:
     This class wraps around sklearn LabelEncoder and can handle a array of categorical
     or a dataframe of mixed types both numeric and categorical
     """
-    def __init__(self):
+    def __init__(self, fillna_value="NaN"):
+        self._fillna_value = fillna_value
         self._label_encoders = None
         self._shape = None
         self._ndim = None
         self._table_type = None
         self._col_names = None
+
+    def _fillna(self, a):
+        b = a.astype("object")
+        b[b.isnull()] = self._fillna_value
+        return b.astype("category")
 
     def fit(self, x):
         self._shape = x.shape
@@ -132,14 +138,14 @@ class GeneralLabelEncoder:
         assert self._table_type in [pd.DataFrame, pd.Series, np.ndarray]
 
         if self._ndim == 1:
-            self._label_encoders = LabelEncoder().fit(x)
+            self._label_encoders = LabelEncoder().fit(self._fillna(x))
             return self
 
 
         if self._table_type == np.ndarray:
             # assume that all columns are category
             ncols = self._shape[1]
-            self._label_encoders = [LabelEncoder().fit(x[:, j]) for j in range(ncols)]
+            self._label_encoders = [LabelEncoder().fit(self._fillna(x[:, j])) for j in range(ncols)]
 
         else:
             self._col_names = x.columns
@@ -148,7 +154,7 @@ class GeneralLabelEncoder:
             self._label_encoders = []
             for col in self._col_names:
                 if col in cat_cols:
-                    self._label_encoders.append(LabelEncoder().fit(x[col]))
+                    self._label_encoders.append(LabelEncoder().fit(self._fillna(x[col])))
                 else:
                     self._label_encoders.append(None)
         return self
@@ -158,22 +164,22 @@ class GeneralLabelEncoder:
         assert self._table_type == type(x), "wrong table type"
 
         if self._ndim == 1:
-            return self._label_encoders.transform(x)
+            return self._label_encoders.transform(self._fillna(x))
 
         assert x.shape[1] == self._shape[1]
-        end_coded_x = x.copy()
+        encoded_x = x.copy()
         if self._table_type == np.ndarray:
             for i, encoder in enumerate(self._label_encoders):
                 if encoder is not None:
-                    end_coded_x[:, i] = encoder.transform(end_coded_x[:, i])
+                    encoded_x[:, i] = encoder.transform(self._fillna(encoded_x[:, i]))
 
         else:
             assert (x.columns == self._col_names).all(), "columns are not the same"
             for col, encoder in zip(self._col_names, self._label_encoders):
                 if encoder is not None:
-                    end_coded_x[col] = encoder.transform(end_coded_x[col])
+                    encoded_x[col] = encoder.transform(self._fillna(encoded_x[col]))
 
-        return end_coded_x
+        return encoded_x
 
     def fit_transform(self, x):
         self.fit(x)
