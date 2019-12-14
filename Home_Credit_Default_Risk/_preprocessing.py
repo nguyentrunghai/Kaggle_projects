@@ -5,6 +5,7 @@ Define function to preprocess data
 import pandas as pd
 import numpy as np
 
+from sklearn.preprocessing import LabelEncoder
 
 def flatten_multiindex_cols(columns):
     fat_cols = ["_".join([str(c) for c in flat_col]) for flat_col in columns.to_flat_index()]
@@ -107,3 +108,76 @@ def onehot_encoding(X_train, X_test):
 
     X_train_ohe, X_test_ohe = X_train_ohe.align(X_test_ohe, join='inner', axis=1)
     return X_train_ohe, X_test_ohe
+
+
+class GeneralLabelEncoder:
+    """
+    sklearn LabelEncoder accepts only 1D array or pd Series.
+    This class wraps around sklearn LabelEncoder and can handle a array of categorical
+    or a dataframe of mixed types both numeric and categorical
+    """
+    def __init__(self):
+        self._label_encoders = None
+        self._shape = None
+        self._ndim = None
+        self._table_type = None
+        self._col_names = None
+
+    def fit(self, x):
+        self._shape = x.shape
+        self._ndim = len(self._shape)
+        assert self._ndim <= 2, "Number of dimension must be <= 2."
+
+        self._table_type = type(x)
+        assert self._table_type in [pd.DataFrame, pd.Series, np.ndarray]
+
+        if self._ndim == 1:
+            self._label_encoders = LabelEncoder().fit(x)
+            return self
+
+
+        if self._table_type == np.ndarray:
+            # assume that all columns are category
+            ncols = self._shape[1]
+            self._label_encoders = [LabelEncoder().fit(x[:, j]) for j in range(ncols)]
+
+        else:
+            self._col_names = x.columns
+            cat_cols = x.select_dtypes(["category", "object", "bool"]).columns
+
+            self._label_encoders = []
+            for col in self._col_names:
+                if col in cat_cols:
+                    self._label_encoders.append(LabelEncoder().fit(x[col]))
+                else:
+                    self._label_encoders.append(None)
+        return self
+
+    def transform(self, x):
+        assert len(x.shape) == self._ndim, "wrong number of dimension"
+        assert self._table_type == type(x), "wrong table type"
+
+        if self._ndim == 1:
+            return self._label_encoders.transform(x)
+
+        assert x.shape[1] == self._shape[1]
+        end_coded_x = x.copy()
+        if self._table_type == np.ndarray:
+            for i, encoder in enumerate(self._label_encoders):
+                if encoder is not None:
+                    end_coded_x[:, i] = encoder.transform(end_coded_x[:, i])
+
+        else:
+            assert (x.columns == self._col_names).all(), "columns are not the same"
+            for col, encoder in zip(self._col_names, self._label_encoders):
+                if encoder is not None:
+                    end_coded_x[col] = encoder.transform(end_coded_x[col])
+
+        return end_coded_x
+
+    def fit_transform(self, x):
+        self.fit(x)
+        return self.transform(x)
+
+
+
