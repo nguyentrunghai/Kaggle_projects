@@ -186,16 +186,10 @@ class GeneralLabelEncoder:
         return self.transform(x)
 
 
-def target_by_classes(df, groupby_col, classes=None, target_col="TARGET", agg_stat=np.mean):
-    """
-    :param df: dataframe
-    :param groupby_col: column name to groupby
-    :param target_col: target column
-    :return: stat, float,
-    """
-    mask = df[groupby_col].isin(classes)
-    return df.loc[mask, target_col].agg(agg_stat)
-
+def weighted_variance(x, weights):
+    average = np.average(x, weights=weights)
+    variance = np.average((x - average)**2, weights=weights)
+    return variance
 
 
 
