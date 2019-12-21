@@ -194,3 +194,7 @@ def weighted_variance(x, weights):
 
 def between_group_variance(group_averages, weights):
     return weighted_variance(group_averages, weights=weights)
+
+
+def within_group_variance(group_variances, weights):
+    return np.average(group_variances, weights=weights)
