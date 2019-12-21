@@ -192,4 +192,5 @@ def weighted_variance(x, weights):
     return variance
 
 
-
+def between_group_variance(group_averages, weights):
+    return weighted_variance(group_averages, weights=weights)
