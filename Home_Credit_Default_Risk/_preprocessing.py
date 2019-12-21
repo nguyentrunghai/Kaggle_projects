@@ -7,6 +7,7 @@ import numpy as np
 
 from sklearn.preprocessing import LabelEncoder
 
+
 def flatten_multiindex_cols(columns):
     fat_cols = ["_".join([str(c) for c in flat_col]) for flat_col in columns.to_flat_index()]
     return fat_cols
