@@ -198,3 +198,7 @@ def between_group_variance(group_averages, weights):
 
 def within_group_variance(group_variances, weights):
     return np.average(group_variances, weights=weights)
+
+
+def f_ratio(group_averages, group_variances, weights):
+    return between_group_variance(group_averages, weights) / within_group_variance(group_variances, weights)
