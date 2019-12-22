@@ -13,28 +13,24 @@ def flatten_multiindex_cols(columns):
     return fat_cols
 
 
-def aggregate(df, by, num_stats=("mean",), cat_stats=("mean",), prefix=None):
+def aggregate(df, by, num_stats=("mean",), cat_stats=("mean",)):
     """
     :param df: dataframe
     :param by: list of column names on which groupby is done
     :param num_stats: list of aggregation statistic functions for numerical columns
     :param cat_stats: list of aggregation statistic functions for categorical columns
-    :param prefix: str, to be appended at the begining of each new column names
     :return agg_df: new dataframe
     """
     assert type(by) in [list, tuple], "by must be a list or tuple"
     assert type(num_stats) in [list, tuple], "num_stats must be a list or tuple"
     assert type(cat_stats) in [list, tuple], "cat_stats must be a list or tuple"
 
-    if prefix is None:
-        prefix = ""
-
     cols_to_group = [df[col] for col in by]
 
     num_df = df.drop(by, axis=1).select_dtypes("number")
     if num_df.shape[1] > 0:
         num_df = num_df.groupby(cols_to_group).agg(num_stats)
-        num_df.columns = [prefix + col for col in flatten_multiindex_cols(num_df.columns)]
+        num_df.columns = [col for col in flatten_multiindex_cols(num_df.columns)]
 
     else:
         print("No numerical columns in df")
@@ -44,7 +40,7 @@ def aggregate(df, by, num_stats=("mean",), cat_stats=("mean",), prefix=None):
     if cat_df.shape[1] > 0:
         cat_df = pd.get_dummies(cat_df)
         cat_df = cat_df.groupby(cols_to_group).agg(cat_stats)
-        cat_df.columns = [prefix + col for col in flatten_multiindex_cols(cat_df.columns)]
+        cat_df.columns = [col for col in flatten_multiindex_cols(cat_df.columns)]
 
     else:
         print("No categorical columns in df")
