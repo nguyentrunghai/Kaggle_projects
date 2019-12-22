@@ -1,5 +1,6 @@
 """
 Define function to preprocess data
+TODO: after merging, NULL in count columns should be fill with zero
 """
 
 import pandas as pd
@@ -13,12 +14,13 @@ def flatten_multiindex_cols(columns):
     return fat_cols
 
 
-def aggregate(df, by, num_stats=("mean",), cat_stats=("mean",)):
+def aggregate(df, by, num_stats=("mean",), cat_stats=("mean",), drop_collin_cols=True):
     """
     :param df: dataframe
     :param by: list of column names on which groupby is done
     :param num_stats: list of aggregation statistic functions for numerical columns
     :param cat_stats: list of aggregation statistic functions for categorical columns
+    :param drop_collin_cols: bool, whether to drop collinear columns
     :return agg_df: new dataframe
     """
     assert type(by) in [list, tuple], "by must be a list or tuple"
@@ -56,10 +58,15 @@ def aggregate(df, by, num_stats=("mean",), cat_stats=("mean",)):
         return num_df.reset_index()
 
     merged_df = num_df.merge(cat_df, how="outer", left_index=True, right_index=True)
-    return merged_df.reset_index()
+    merged_df = merged_df.reset_index()
+
+    if drop_collin_cols:
+        merged_df = drop_collinear_columns(merged_df, threshold=0.9999)
+
+    return merged_df
 
 
-def drop_colinear_columns(df, threshold):
+def drop_collinear_columns(df, threshold):
     """
     :param df: dataframe
     :param threshold: float, 0 <= threshold <= 1
