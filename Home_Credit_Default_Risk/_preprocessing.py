@@ -52,15 +52,24 @@ def aggregate(df, by, num_stats=("mean",), cat_stats=("mean",), drop_collin_cols
         return None
 
     if num_df is None:
-        return cat_df.reset_index()
+        cat_df = cat_df.reset_index()
+        if drop_collin_cols:
+            print("Drop collinear columns")
+            cat_df = drop_collinear_columns(cat_df, threshold=0.9999)
+        return cat_df
 
     if cat_df is None:
-        return num_df.reset_index()
+        num_df = num_df.reset_index()
+        if drop_collin_cols:
+            print("Drop collinear columns")
+            num_df = drop_collinear_columns(num_df, threshold=0.9999)
+        return num_df
 
     merged_df = num_df.merge(cat_df, how="outer", left_index=True, right_index=True)
     merged_df = merged_df.reset_index()
 
     if drop_collin_cols:
+        print("Drop collinear columns")
         merged_df = drop_collinear_columns(merged_df, threshold=0.9999)
 
     return merged_df
