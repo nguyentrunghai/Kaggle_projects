@@ -51,28 +51,20 @@ def aggregate(df, by, num_stats=("mean",), cat_stats=("mean",), drop_collin_cols
     if (num_df is None) and (cat_df is None):
         return None
 
-    if num_df is None:
-        cat_df = cat_df.reset_index()
-        if drop_collin_cols:
-            print("Drop collinear columns")
-            cat_df = drop_collinear_columns(cat_df, threshold=0.9999)
-        return cat_df
+    elif num_df is None:
+        df = cat_df.reset_index()
 
-    if cat_df is None:
-        num_df = num_df.reset_index()
-        if drop_collin_cols:
-            print("Drop collinear columns")
-            num_df = drop_collinear_columns(num_df, threshold=0.9999)
-        return num_df
+    elif cat_df is None:
+        df = num_df.reset_index()
 
-    merged_df = num_df.merge(cat_df, how="outer", left_index=True, right_index=True)
-    merged_df = merged_df.reset_index()
+    else:
+        df = num_df.merge(cat_df, how="outer", left_index=True, right_index=True)
+        df = df.reset_index()
 
     if drop_collin_cols:
         print("Drop collinear columns")
-        merged_df = drop_collinear_columns(merged_df, threshold=0.9999)
-
-    return merged_df
+        df = drop_collinear_columns(df, threshold=0.9999)
+    return df
 
 
 def drop_collinear_columns(df, threshold):
