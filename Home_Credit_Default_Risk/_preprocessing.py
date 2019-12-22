@@ -13,7 +13,7 @@ def flatten_multiindex_cols(columns):
     return fat_cols
 
 
-def aggregate(df, by, num_stats=("mean",), cat_stats=("count",), prefix=None):
+def aggregate(df, by, num_stats=("mean",), cat_stats=("mean",), prefix=None):
     """
     :param df: dataframe
     :param by: list of column names on which groupby is done
