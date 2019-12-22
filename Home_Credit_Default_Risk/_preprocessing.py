@@ -22,6 +22,10 @@ def aggregate(df, by, num_stats=("mean",), cat_stats=("mean",), prefix=None):
     :param prefix: str, to be appended at the begining of each new column names
     :return agg_df: new dataframe
     """
+    assert type(by) in [list, tuple], "by must be a list or tuple"
+    assert type(num_stats) in [list, tuple], "num_stats must be a list or tuple"
+    assert type(cat_stats) in [list, tuple], "cat_stats must be a list or tuple"
+
     if prefix is None:
         prefix = ""
 
