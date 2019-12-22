@@ -59,6 +59,18 @@ def aggregate(df, by, num_stats=("mean",), cat_stats=("mean",)):
     return merged_df.reset_index()
 
 
+def drop_colinear_columns(df, threshold):
+    """
+    :param df: dataframe
+    :param threshold: float, 0 <= threshold <= 1
+    :return: dataframe
+    """
+    corr_matr = df.corr().abs()
+    upper_matr = corr_matr.where(np.triu(np.ones(corr_matr.shape), k=1).astype(np.bool))
+    dropped_cols = [col for col in upper_matr.columns if (upper_matr[col] > threshold).any()]
+    return df.drop(dropped_cols, axis=1)
+
+
 def change_dtypes(df):
     """
     change types of columns to reduce memory size
