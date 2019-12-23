@@ -15,14 +15,14 @@ def flatten_multiindex_cols(columns):
 
 
 def aggregate(df, by, num_stats=("mean",), cat_stats=("mean",),
-              onehot_encode_cat=True,
+              onehot_encode=True,
               drop_collin_cols=True):
     """
     :param df: dataframe
     :param by: list of column names on which groupby is done
     :param num_stats: list of aggregation statistic functions for numerical columns
     :param cat_stats: list of aggregation statistic functions for categorical columns
-    :param onehot_encode_cat: bool, whether cat columns are onehot encoded
+    :param onehot_encode: bool, whether categorical columns are onehot-encoded
     :param drop_collin_cols: bool, whether to drop collinear columns
     :return agg_df: new dataframe
     """
@@ -43,7 +43,7 @@ def aggregate(df, by, num_stats=("mean",), cat_stats=("mean",),
 
     cat_df = df.drop(by, axis=1).select_dtypes(["object", "category"])
     if cat_df.shape[1] > 0:
-        if onehot_encode_cat:
+        if onehot_encode:
             cat_df = pd.get_dummies(cat_df)
         cat_df = cat_df.groupby(cols_to_group).agg(cat_stats)
         cat_df.columns = [col for col in flatten_multiindex_cols(cat_df.columns)]
