@@ -41,7 +41,7 @@ def aggregate(df, by, num_stats=("mean",), cat_stats=("mean",),
         print("No numerical columns in df")
         num_df = None
 
-    cat_df = df.drop(by, axis=1).select_dtypes(["object", "category"])
+    cat_df = df.drop(by, axis=1).select_dtypes(["object", "category", "bool"])
     if cat_df.shape[1] > 0:
         if onehot_encode:
             cat_df = pd.get_dummies(cat_df)
