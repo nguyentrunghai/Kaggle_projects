@@ -61,16 +61,17 @@ def aggregate(df, by,
 
     elif num_df is None:
         df = cat_df.reset_index()
-        if dtype == "cat":
-            return df
 
     elif cat_df is None:
         df = num_df.reset_index()
-        if dtype == "num":
-            return df
 
     else:
-        df = num_df.merge(cat_df, how="outer", left_index=True, right_index=True)
+        if dtype == "num":
+            df = num_df
+        elif dtype == "cat":
+            df = cat_df
+        else:
+            df = num_df.merge(cat_df, how="outer", left_index=True, right_index=True)
         df = df.reset_index()
 
     if drop_collin_cols:
