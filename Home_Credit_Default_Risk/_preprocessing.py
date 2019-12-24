@@ -30,31 +30,49 @@ def aggregate(df, by,
     """
     assert dtype in ["all", "num", "cat"]
     assert type(by) in [list, tuple], "by must be a list or tuple"
-    assert type(num_stats) in [list, tuple], "num_stats must be a list or tuple"
-    assert type(cat_stats) in [list, tuple], "cat_stats must be a list or tuple"
 
     cols_to_group = [df[col] for col in by]
 
-    num_df = df.drop(by, axis=1).select_dtypes("number")
-    if num_df.shape[1] > 0:
-        num_df = num_df.groupby(cols_to_group).agg(num_stats)
-        num_df.columns = [col for col in flatten_multiindex_cols(num_df.columns)]
+    if dtype in ["all", "num"]:
+        num_df = df.drop(by, axis=1).select_dtypes("number")
+        if num_df.shape[1] > 0:
+            assert type(num_stats) in [list, tuple], "num_stats must be a list or tuple"
+            num_df = num_df.groupby(cols_to_group).agg(num_stats)
+            num_df.columns = [col for col in flatten_multiindex_cols(num_df.columns)]
 
-    else:
-        print("No numerical columns in df")
-        num_df = None
+        else:
+            print("No numerical columns in df")
+            num_df = None
+            if dtype == "num":
+                return None
 
-    cat_df = df.drop(by, axis=1).select_dtypes(["object", "category", "bool"])
-    if cat_df.shape[1] > 0:
-        if onehot_encode:
-            cat_df = pd.get_dummies(cat_df)
+        if dtype == "num":
+            df = num_df.reset_index()
+            if drop_collin_cols:
+                df = drop_collinear_columns(df, threshold=0.9999)
+            return df
 
-        cat_df = cat_df.groupby(cols_to_group).agg(cat_stats)
-        cat_df.columns = [col for col in flatten_multiindex_cols(cat_df.columns)]
+    if dtype in ["all", "cat"]:
+        cat_df = df.drop(by, axis=1).select_dtypes(["object", "category", "bool"])
+        if cat_df.shape[1] > 0:
+            if onehot_encode:
+                cat_df = pd.get_dummies(cat_df)
 
-    else:
-        print("No categorical columns in df")
-        cat_df = None
+            assert type(cat_stats) in [list, tuple], "cat_stats must be a list or tuple"
+            cat_df = cat_df.groupby(cols_to_group).agg(cat_stats)
+            cat_df.columns = [col for col in flatten_multiindex_cols(cat_df.columns)]
+
+        else:
+            print("No categorical columns in df")
+            cat_df = None
+            if dtype == "cat":
+                return None
+
+        if dtype == "cat":
+            df = cat_df.reset_index()
+            if drop_collin_cols:
+                df = drop_collinear_columns(df, threshold=0.9999)
+            return df
 
     if (num_df is None) and (cat_df is None):
         return None
@@ -66,13 +84,8 @@ def aggregate(df, by,
         df = num_df.reset_index()
 
     else:
-        if dtype == "num":
-            df = num_df
-        elif dtype == "cat":
-            df = cat_df
-        else:
-            df = num_df.merge(cat_df, how="outer", left_index=True, right_index=True)
-        df = df.reset_index()
+        df = num_df.merge(cat_df, how="outer", left_index=True, right_index=True)
+    df = df.reset_index()
 
     if drop_collin_cols:
         df = drop_collinear_columns(df, threshold=0.9999)
