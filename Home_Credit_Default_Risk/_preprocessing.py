@@ -37,7 +37,6 @@ def aggregate(df, by,
 
     num_df = df.drop(by, axis=1).select_dtypes("number")
     if num_df.shape[1] > 0:
-
         num_df = num_df.groupby(cols_to_group).agg(num_stats)
         num_df.columns = [col for col in flatten_multiindex_cols(num_df.columns)]
 
