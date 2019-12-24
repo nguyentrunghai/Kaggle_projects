@@ -14,18 +14,22 @@ def flatten_multiindex_cols(columns):
     return fat_cols
 
 
-def aggregate(df, by, num_stats=("mean",), cat_stats=("mean",),
+def aggregate(df, by,
+              dtype="all",
+              num_stats=("mean",), cat_stats=("mean",),
               onehot_encode=True,
               drop_collin_cols=True):
     """
     :param df: dataframe
     :param by: list of column names on which groupby is done
+    :param dtype: str, either "all", "num" or "cat"
     :param num_stats: list of aggregation statistic functions for numerical columns
     :param cat_stats: list of aggregation statistic functions for categorical columns
     :param onehot_encode: bool, whether categorical columns are onehot-encoded
     :param drop_collin_cols: bool, whether to drop collinear columns
     :return agg_df: new dataframe
     """
+    assert dtype in ["all", "num", "cat"]
     assert type(by) in [list, tuple], "by must be a list or tuple"
     assert type(num_stats) in [list, tuple], "num_stats must be a list or tuple"
     assert type(cat_stats) in [list, tuple], "cat_stats must be a list or tuple"
@@ -57,16 +61,19 @@ def aggregate(df, by, num_stats=("mean",), cat_stats=("mean",),
 
     elif num_df is None:
         df = cat_df.reset_index()
+        if dtype == "cat":
+            return df
 
     elif cat_df is None:
         df = num_df.reset_index()
+        if dtype == "num":
+            return df
 
     else:
         df = num_df.merge(cat_df, how="outer", left_index=True, right_index=True)
         df = df.reset_index()
 
     if drop_collin_cols:
-        print("Drop collinear columns")
         df = drop_collinear_columns(df, threshold=0.9999)
     return df
 
@@ -80,6 +87,7 @@ def drop_collinear_columns(df, threshold):
     corr_matr = df.corr().abs()
     upper_matr = corr_matr.where(np.triu(np.ones(corr_matr.shape), k=1).astype(np.bool))
     dropped_cols = [col for col in upper_matr.columns if (upper_matr[col] > threshold).any()]
+    print("Drop %d collinear columns" % len(dropped_cols))
     return df.drop(dropped_cols, axis=1)
 
 
