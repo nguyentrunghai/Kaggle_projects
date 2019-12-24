@@ -1,6 +1,5 @@
 """
 Define function to preprocess data
-TODO: after merging, NULL in count columns should be fill with zero
 """
 
 import pandas as pd
@@ -85,6 +84,7 @@ def drop_collinear_columns(df, threshold):
     :param threshold: float, 0 <= threshold <= 1
     :return: dataframe
     """
+    df = df.select_dtypes(["number"])
     corr_matr = df.corr().abs()
     upper_matr = corr_matr.where(np.triu(np.ones(corr_matr.shape), k=1).astype(np.bool))
     dropped_cols = [col for col in upper_matr.columns if (upper_matr[col] > threshold).any()]
