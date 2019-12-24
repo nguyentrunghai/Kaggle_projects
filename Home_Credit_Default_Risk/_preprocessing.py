@@ -133,18 +133,6 @@ def change_dtypes(df):
     return df
 
 
-def deal_with_abnormal_days_employed(df):
-    """
-    :param df: dataframe
-    :return df: data frame
-    """
-    key = "DAYS_EMPLOYED"
-    abnormal_val = df[key].max()
-    df[key + "_ABNORMAL"] = df[key] == abnormal_val
-    df[key].replace({abnormal_val: np.nan}, inplace=True)
-    return df
-
-
 def onehot_encoding(X_train, X_test):
     """
     :param X_train: dataframe
@@ -232,3 +220,20 @@ class GeneralLabelEncoder:
     def fit_transform(self, x):
         self.fit(x)
         return self.transform(x)
+
+
+def feature_extraction_application(csv_file):
+    df = pd.read_csv(csv_file)
+    df = change_dtypes(df)
+
+    days_emp_max = df["DAYS_EMPLOYED"].max()
+    df["DAYS_EMPLOYED_POSITIVE"] = df["DAYS_EMPLOYED"] > 0
+    df["DAYS_EMPLOYED"].replace({days_emp_max: np.nan}, inplace=True)
+
+    df["AMT_INCOME_TOTAL_LOG"] = np.log(df["AMT_INCOME_TOTAL"])
+
+    df["CREDIT_TO_INCOME"] = df["AMT_CREDIT"] / df["AMT_INCOME_TOTAL"]
+    df["CREDIT_TO_GOODS"] = df["AMT_CREDIT"] / df["AMT_GOODS_PRICE"]
+
+    return df
+
