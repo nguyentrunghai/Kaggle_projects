@@ -331,7 +331,7 @@ def feature_extraction_bureau_balance(bureau_balance_csv_file, bureau_csv_file):
 
     df_agg = df_agg.merge(df_agg_1, how="outer", on="SK_ID_BUREAU")
 
-    df_agg = df_agg.merge(id_cols, how="left", on="SK_ID_BUREAU")
+    df_agg = id_cols.merge(df_agg, how="left", on="SK_ID_BUREAU")
 
     df_agg.drop(["SK_ID_BUREAU"], axis=1)
     print("Aggregate both numerical and categorical columns by SK_ID_CURR")
