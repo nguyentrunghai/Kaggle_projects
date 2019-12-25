@@ -332,6 +332,10 @@ def feature_extraction_bureau_balance(bureau_balance_csv_file, bureau_csv_file):
     df_agg = df_agg.merge(df_agg_1, how="outer", on="SK_ID_BUREAU")
 
     df_agg = id_cols.merge(df_agg, how="left", on="SK_ID_BUREAU")
+    count_cols = [col for col in df_agg.columns if col.split("_")[-1] in ["count", "sum", "nunique"]]
+    print("Fillna these columns with zero:\n", count_cols)
+    for col in count_cols:
+        df_agg[col].fillna(0)
 
     df_agg.drop(["SK_ID_BUREAU"], axis=1)
     print("Aggregate both numerical and categorical columns by SK_ID_CURR")
@@ -342,3 +346,65 @@ def feature_extraction_bureau_balance(bureau_balance_csv_file, bureau_csv_file):
     return df_agg
 
 
+def feature_extraction_previous_application(csv_file):
+    """
+    :param csv_file: str, path to csv file
+    :return: dataframe
+    """
+    print("Extracting features from " + csv_file)
+    df = pd.read_csv(csv_file)
+    df = change_dtypes(df)
+    df = df.drop(["SK_ID_PREV"], axis=1)
+
+    # agg both numerical and categorical columns
+    print("Aggregate both numerical and categorical columns")
+    df_agg = aggregate(df, by=["SK_ID_CURR"], dtype="all",
+                       num_stats=["count", "sum", "mean", np.var, "min", "max"],
+                       cat_stats=["sum", "mean"])
+
+    # agg categorical columns with nunique and mode
+    print("Aggregate categorical columns with nunique and mode")
+    df_agg_1 = aggregate(df, by=["SK_ID_CURR"], dtype="cat", cat_stats=["nunique", mode], onehot_encode=False)
+    df_agg = df_agg.merge(df_agg_1, how="outer", on="SK_ID_CURR")
+
+    return df_agg
+
+
+def feature_extraction_POS_CASH_balance(POS_CASH_balance_csv_file, previous_application_csv_file):
+    """
+    :param POS_CASH_balance_csv_file: str, path of POS_CASH_balance csv file
+    :param previous_application_csv_file: str, path of previous_application csv file
+    :return: dataframe
+    """
+    print("Extracting features from " + POS_CASH_balance_csv_file)
+    df = pd.read_csv(POS_CASH_balance_csv_file)
+    df = change_dtypes(df)
+    df = df.drop(["SK_ID_CURR"], axis=1)
+
+    id_cols = pd.read_csv(previous_application_csv_file)[["SK_ID_CURR", "SK_ID_PREV"]]
+    id_cols = change_dtypes(id_cols)
+
+    # agg both numerical columns by SK_ID_BUREAU
+    print("Aggregate both numerical and categorical columns by SK_ID_BUREAU")
+    df_agg = aggregate(df, by=["SK_ID_PREV"], dtype="all",
+                       num_stats=["count", "sum", "mean", np.var, "min", "max"],
+                       cat_stats=["sum", "mean"])
+
+    print("Aggregate categorical columns by SK_ID_BUREAU with stats nunique and mode")
+    df_agg_1 = aggregate(df, by=["SK_ID_PREV"], dtype="cat", cat_stats=["nunique", mode], onehot_encode=False)
+
+    df_agg = df_agg.merge(df_agg_1, how="outer", on="SK_ID_PREV")
+
+    df_agg = id_cols.merge(df_agg, how="left", on="SK_ID_PREV")
+    count_cols = [col for col in df_agg.columns if col.split("_")[-1] in ["count", "sum", "nunique"]]
+    print("Fillna these columns with zero:\n", count_cols)
+    for col in count_cols:
+        df_agg[col].fillna(0)
+
+    df_agg.drop(["SK_ID_BUREAU"], axis=1)
+    print("Aggregate both numerical and categorical columns by SK_ID_CURR")
+    df_agg = aggregate(df_agg, by=["SK_ID_CURR"], dtype="all",
+                       num_stats=["count", "sum", "mean", np.var, "min", "max"],
+                       cat_stats=["sum", "mean"])
+
+    return df_agg
