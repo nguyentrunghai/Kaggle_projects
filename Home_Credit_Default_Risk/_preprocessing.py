@@ -7,6 +7,7 @@ import numpy as np
 
 from sklearn.preprocessing import LabelEncoder
 
+from _stats import mode
 from _stats import mean_diff, var_diff, range_diff
 
 
@@ -103,7 +104,7 @@ def drop_collinear_columns(df, threshold):
     df_num = df.select_dtypes(["number"])
     if df_num.shape[1] == 0:
         return df
-    
+
     corr_matr = df_num.corr().abs()
     upper_matr = corr_matr.where(np.triu(np.ones(corr_matr.shape), k=1).astype(np.bool))
     dropped_cols = [col for col in upper_matr.columns if (upper_matr[col] > threshold).any()]
@@ -297,9 +298,9 @@ def feature_extraction_bureau(csv_file):
         df_agg_1[col] = tmp
     df_agg = df_agg.merge(df_agg_1, how="outer", on="SK_ID_CURR")
 
-    # agg categorical columns with nunique
-    print("Aggregate categorical columns with nunique")
-    df_agg_2 = aggregate(df, by=["SK_ID_CURR"], dtype="cat", cat_stats=["nunique"], onehot_encode=False)
+    # agg categorical columns with nunique and mode
+    print("Aggregate categorical columns with nunique and mode")
+    df_agg_2 = aggregate(df, by=["SK_ID_CURR"], dtype="cat", cat_stats=["nunique", mode], onehot_encode=False)
     df_agg = df_agg.merge(df_agg_2, how="outer", on="SK_ID_CURR")
 
     return df_agg
