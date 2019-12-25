@@ -384,12 +384,12 @@ def feature_extraction_POS_CASH_balance(POS_CASH_balance_csv_file, previous_appl
     id_cols = pd.read_csv(previous_application_csv_file)[["SK_ID_CURR", "SK_ID_PREV"]]
     id_cols = change_dtypes(id_cols)
 
-    # agg both numerical columns by SK_ID_PREV
+    # agg numerical columns by SK_ID_PREV
     print("Aggregate numerical columns by SK_ID_PREV")
     df_agg = aggregate(df, by=["SK_ID_PREV"], dtype="num",
                        num_stats=["count", "sum", "mean", np.var, "min", "max"])
 
-    print("Aggregate categorical columns by SK_ID_PREV with stats nunique and mode")
+    print("Aggregate categorical columns by SK_ID_PREV with nunique and mode")
     df_agg_1 = aggregate(df, by=["SK_ID_PREV"], dtype="cat", cat_stats=["nunique", mode], onehot_encode=False)
 
     df_agg = df_agg.merge(df_agg_1, how="outer", on="SK_ID_PREV")
