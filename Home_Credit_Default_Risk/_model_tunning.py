@@ -9,6 +9,8 @@ from sklearn.model_selection import RandomizedSearchCV
 from sklearn.model_selection import StratifiedKFold
 from sklearn.model_selection import train_test_split
 
+from sklearn.metrics import roc_auc_score
+
 
 def grid_search(estimator, X_train, y_train, params_grid, scoring, cv,
                 random_state=None, re_fit=False, pkl_out=None):
@@ -170,3 +172,14 @@ def grid_search_stepwise(estimator, X_train, y_train, params_grid_steps,
         pickle.dump(results, open(pkl_out, "wb"))
 
     return results
+
+
+def roc_auc(estimator, X_eval, y_eval):
+    """
+    :param estimator: sklearn estimator that have predict_proba() method
+    :param X_eval: test features
+    :param y_eval: test target
+    :return: float
+    """
+    proba = estimator.predict_proba(X_eval)
+    return roc_auc_score(y_eval, proba)
