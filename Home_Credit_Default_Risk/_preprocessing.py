@@ -7,7 +7,8 @@ import numpy as np
 
 from sklearn.preprocessing import LabelEncoder
 
-from _stats import mode
+from _stats import mean_diff, var_diff, range_diff
+
 
 def flatten_multiindex_cols(columns):
     fat_cols = ["_".join([str(c) for c in flat_col]) for flat_col in columns.to_flat_index()]
@@ -253,14 +254,43 @@ def feature_extraction_bureau(csv_file):
     df = pd.read_csv(csv_file)
     df = df.drop(["SK_ID_BUREAU"], axis=1)
 
+    # some engineered features
+    # whether DPU over 1, 3, and 120 months
+    df["CREDIT_DAY_OVERDUE_OVER_0M"] = df["CREDIT_DAY_OVERDUE"] == 0
+    df["CREDIT_DAY_OVERDUE_OVER_1M"] = df["CREDIT_DAY_OVERDUE"] > 30
+    df["CREDIT_DAY_OVERDUE_OVER_3M"] = df["CREDIT_DAY_OVERDUE"] > 90
+    df["CREDIT_DAY_OVERDUE_OVER_6M"] = df["CREDIT_DAY_OVERDUE"] > 120
+
+    df["DAYS_CREDIT_ENDDATE_POS"] = df["DAYS_CREDIT_ENDDATE"] > 0
+
+
     # agg both numerical and categorical columns
+    print("Aggregate both numerical and categorical columns")
     df_agg = aggregate(df, by=["SK_ID_CURR"], dtype="all",
-                       num_stats=["count", "mean", np.var, "min", "max"],
+                       num_stats=["count", "sum", "mean", np.var, "min", "max"],
                        cat_stats=["sum", "mean"])
 
-    # agg categorical columns with nunique and mode
-    df_aag_1 = aggregate(df, by=["SK_ID_CURR"], dtype="cat", cat_stats=["nunique", mode], onehot_encode=False)
+    # some more more engineered features
+    df_agg["DEBT_TO_CREDIT"] = df_agg["AMT_CREDIT_SUM_DEBT_sum"] / df_agg["AMT_CREDIT_SUM_sum"]
+    df_agg["OVERDUE_TO_DEBT"] = df_agg["AMT_CREDIT_SUM_OVERDUE_sum"] / df_agg["AMT_CREDIT_SUM_DEBT_sum"]
 
-    df_agg = df_agg.merge(df_aag_1, how="outer", on="SK_ID_CURR")
-    df_mode = aggregate(df, by=["SK_ID_CURR"], dtype="cat", cat_stats=[mode], onehot_encode=False)
+    df_agg["DEBT_TO_CREDIT"] = df_agg["DEBT_TO_CREDIT"].replace({np.inf: np.nan, -np.inf: np.nan})
+    df_agg["OVERDUE_TO_DEBT"] = df_agg["OVERDUE_TO_DEBT"].replace({np.inf: np.nan, -np.inf: np.nan})
+
+    # time between loans
+    print("Aggregate DAYS_CREDIT with mean_diff, var_diff and range_diff")
+    df_agg_1 = aggregate(df[["SK_ID_CURR", "DAYS_CREDIT"]], by=["SK_ID_CURR"], dtype="num",
+                         num_stats=[mean_diff, var_diff, range_diff])
+    for col in df_agg_1.columns:
+        df_agg_1[col] = df_agg_1[col].replace({np.inf: np.nan, -np.inf: np.nan})
+    df_agg = df_agg.merge(df_agg_1, how="outer", on="SK_ID_CURR")
+
+    # agg categorical columns with nunique
+    print("Aggregate categorical columns with nunique")
+    df_agg_2 = aggregate(df, by=["SK_ID_CURR"], dtype="cat", cat_stats=["nunique"], onehot_encode=False)
+
+    df_agg = df_agg.merge(df_agg_2, how="outer", on="SK_ID_CURR")
+    return df_agg
+
+
 
