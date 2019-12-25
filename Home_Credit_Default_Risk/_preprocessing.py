@@ -469,7 +469,7 @@ def merge_tables(main_csv_file, on="SK_ID_CURR", other_csv_files=None, prefixes=
     assert len(other_csv_files) == len(prefixes), "other_csv_files and prefixes must have the same len"
 
     for other_csv, prefix in zip(other_csv_files, prefixes):
-        print("Loading ", other_csv)
+        #print("Loading ", other_csv)
         other_df = pd.read_csv(other_csv)
         other_df = change_dtypes(other_df)
         new_cols = [col if col == on else prefix + col for col in other_df.columns]
@@ -479,7 +479,7 @@ def merge_tables(main_csv_file, on="SK_ID_CURR", other_csv_files=None, prefixes=
         df = df.merge(other_df, how="left", on=on)
 
         count_cols = [col for col in df.columns if col.split("_")[-1] in ["count", "sum", "nunique"]]
-        print("Fillna these columns with zero:\n", count_cols)
+        #print("Fillna these columns with zero:\n", count_cols)
         for col in count_cols:
             df[col] = df[col].fillna(0)
 
