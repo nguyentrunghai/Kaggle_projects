@@ -3,6 +3,7 @@ define some statistic functions
 """
 
 import numpy as np
+import scipy
 
 
 def weighted_variance(x, weights):
@@ -40,4 +41,8 @@ def corrwith(df, series):
     corrs = corrs.drop(["abs_corr"], axis=1)
 
     return corrs["corr"]
+
+
+def mode(x):
+    return scipy.stats.mode(x)[0]
 
