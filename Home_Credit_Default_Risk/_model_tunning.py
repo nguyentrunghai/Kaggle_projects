@@ -182,4 +182,4 @@ def roc_auc(estimator, X_eval, y_eval):
     :return: float
     """
     proba = estimator.predict_proba(X_eval)
-    return roc_auc_score(y_eval, proba)
+    return roc_auc_score(y_eval, proba[:, 1])
