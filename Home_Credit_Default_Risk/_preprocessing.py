@@ -16,6 +16,8 @@ def flatten_multiindex_cols(columns):
     return fat_cols
 
 
+# TODO refactor this function, it is a mess!
+# The "by" column disappears in the result when df does not contain cat columns
 def aggregate(df, by,
               dtype="all",
               num_stats=None, cat_stats=None,
@@ -405,9 +407,8 @@ def feature_extraction_POS_CASH_balance(POS_CASH_balance_csv_file, previous_appl
         df_agg[col] = df_agg[col].fillna(0)
 
     print("Aggregate both numerical and categorical columns by SK_ID_CURR")
-    df_agg = aggregate(df_agg, by=["SK_ID_CURR"], dtype="all",
-                       num_stats=["count", "sum", "mean", np.var, "min", "max"],
-                       cat_stats=["sum", "mean"])
+    df_agg = aggregate(df_agg, by=["SK_ID_CURR"], dtype="num",
+                       num_stats=["count", "sum", "mean", np.var, "min", "max"])
 
     return df_agg
 
