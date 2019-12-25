@@ -387,7 +387,7 @@ def feature_extraction_POS_CASH_balance(POS_CASH_balance_csv_file, previous_appl
     id_cols = pd.read_csv(previous_application_csv_file)[["SK_ID_CURR", "SK_ID_PREV"]]
     id_cols = change_dtypes(id_cols)
 
-    # agg numerical columns by SK_ID_PREV
+    # agg numerical and cat columns by SK_ID_PREV
     print("Aggregate numerical columns by SK_ID_PREV")
     df_agg = aggregate(df, by=["SK_ID_PREV"], dtype="all",
                        num_stats=["count", "sum", "mean", np.var, "min", "max"],
@@ -428,6 +428,29 @@ def feature_extraction_installments_payments(installments_payments_csv_file, pre
     :param previous_application_csv_file: str, path of previous_application csv file
     :return: dataframe
     """
-    return feature_extraction_POS_CASH_balance(installments_payments_csv_file, previous_application_csv_file)
+    print("Extracting features from " + installments_payments_csv_file)
+    df = pd.read_csv(installments_payments_csv_file)
+    df = change_dtypes(df)
+    df = df.drop(["SK_ID_CURR"], axis=1)
 
+    id_cols = pd.read_csv(previous_application_csv_file)[["SK_ID_CURR", "SK_ID_PREV"]]
+    id_cols = change_dtypes(id_cols)
 
+    # agg numerical columns by SK_ID_PREV
+    print("Aggregate numerical columns by SK_ID_PREV")
+    df_agg = aggregate(df, by=["SK_ID_PREV"], dtype="num",
+                       num_stats=["count", "sum", "mean", np.var, "min", "max"])
+
+    df_agg = id_cols.merge(df_agg, how="left", on="SK_ID_PREV")
+    df_agg = df_agg.drop(["SK_ID_PREV"], axis=1)
+
+    count_cols = [col for col in df_agg.columns if col.split("_")[-1] in ["count", "sum", "nunique"]]
+    print("Fillna these columns with zero:\n", count_cols)
+    for col in count_cols:
+        df_agg[col] = df_agg[col].fillna(0)
+
+    print("Aggregate both numerical and categorical columns by SK_ID_CURR")
+    df_agg = aggregate(df_agg, by=["SK_ID_CURR"], dtype="num",
+                       num_stats=["count", "sum", "mean", np.var, "min", "max"])
+
+    return df_agg
