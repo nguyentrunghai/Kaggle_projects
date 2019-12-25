@@ -320,11 +320,10 @@ def feature_extraction_bureau_balance(bureau_balance_csv_file, bureau_csv_file):
     id_cols = pd.read_csv(bureau_csv_file)[["SK_ID_CURR", "SK_ID_BUREAU"]]
     id_cols = change_dtypes(id_cols)
 
-    # agg both numerical and categorical columns
+    # agg both numerical columns by SK_ID_BUREAU
     print("Aggregate both numerical and categorical columns by SK_ID_BUREAU")
-    df_agg = aggregate(df, by=["SK_ID_BUREAU"], dtype="all",
-                       num_stats=["count", "sum", "mean", np.var, "min", "max"],
-                       cat_stats=["sum", "mean"])
+    df_agg = aggregate(df, by=["SK_ID_BUREAU"], dtype="num",
+                       num_stats=["count", "sum", "mean", np.var, "min", "max"])
 
     print("Aggregate categorical columns by SK_ID_BUREAU with stats nunique and mode")
     df_agg_1 = aggregate(df, by=["SK_ID_BUREAU"], dtype="cat", cat_stats=["nunique", mode], onehot_encode=False)
@@ -336,7 +335,7 @@ def feature_extraction_bureau_balance(bureau_balance_csv_file, bureau_csv_file):
     df_agg.drop(["SK_ID_BUREAU"], axis=1)
     print("Aggregate both numerical and categorical columns by SK_ID_CURR")
     df_agg = aggregate(df_agg, by=["SK_ID_CURR"], dtype="all",
-                       num_stats=["sum", "mean", np.var, "min", "max"],
+                       num_stats=["count", "sum", "mean", np.var, "min", "max"],
                        cat_stats=["sum", "mean"])
 
     return df_agg
