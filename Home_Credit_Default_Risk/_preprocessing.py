@@ -454,3 +454,34 @@ def feature_extraction_installments_payments(installments_payments_csv_file, pre
                        num_stats=["count", "sum", "mean", np.var, "min", "max"])
 
     return df_agg
+
+
+def merge_tables(main_csv_file, on="SK_ID_CURR", other_csv_files=None, prefixes=None):
+    print("Loading " + main_csv_file)
+    df = pd.read_csv(main_csv_file)
+    df = change_dtypes(df)
+
+    if other_csv_files is None:
+        return df
+
+    assert type(other_csv_files) == list, "other_csv_files must be a list"
+    assert type(prefixes) == list, "prefixes must be a list"
+    assert len(other_csv_files) == len(prefixes), "other_csv_files and prefixes must have the same len"
+
+    for other_csv, prefix in zip(other_csv_files, prefixes):
+        print("Loading ", other_csv)
+        other_df = pd.read_csv(other_csv)
+        other_df = change_dtypes(other_df)
+        new_cols = [col if col == on else prefix + col for col in other_df.columns]
+        print(new_cols)
+        other_df.columns = new_cols
+
+        df = df.merge(other_df, how="left", on=on)
+
+        count_cols = [col for col in df.columns if col.split("_")[-1] in ["count", "sum", "nunique"]]
+        print("Fillna these columns with zero:\n", count_cols)
+        for col in count_cols:
+            df[col] = df[col].fillna(0)
+
+    return df
+
