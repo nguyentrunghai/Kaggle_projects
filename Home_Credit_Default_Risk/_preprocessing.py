@@ -384,13 +384,12 @@ def feature_extraction_POS_CASH_balance(POS_CASH_balance_csv_file, previous_appl
     id_cols = pd.read_csv(previous_application_csv_file)[["SK_ID_CURR", "SK_ID_PREV"]]
     id_cols = change_dtypes(id_cols)
 
-    # agg both numerical columns by SK_ID_BUREAU
-    print("Aggregate both numerical and categorical columns by SK_ID_BUREAU")
-    df_agg = aggregate(df, by=["SK_ID_PREV"], dtype="all",
-                       num_stats=["count", "sum", "mean", np.var, "min", "max"],
-                       cat_stats=["sum", "mean"])
+    # agg both numerical columns by SK_ID_PREV
+    print("Aggregate numerical columns by SK_ID_PREV")
+    df_agg = aggregate(df, by=["SK_ID_PREV"], dtype="num",
+                       num_stats=["count", "sum", "mean", np.var, "min", "max"])
 
-    print("Aggregate categorical columns by SK_ID_BUREAU with stats nunique and mode")
+    print("Aggregate categorical columns by SK_ID_PREV with stats nunique and mode")
     df_agg_1 = aggregate(df, by=["SK_ID_PREV"], dtype="cat", cat_stats=["nunique", mode], onehot_encode=False)
 
     df_agg = df_agg.merge(df_agg_1, how="outer", on="SK_ID_PREV")
@@ -408,3 +407,23 @@ def feature_extraction_POS_CASH_balance(POS_CASH_balance_csv_file, previous_appl
                        cat_stats=["sum", "mean"])
 
     return df_agg
+
+
+def feature_extraction_credit_card_balance(credit_card_balance_csv_file, previous_application_csv_file):
+    """
+    :param credit_card_balance_csv_file: str, path of credit_card_balance csv file
+    :param previous_application_csv_file: str, path of previous_application csv file
+    :return: dataframe
+    """
+    return feature_extraction_POS_CASH_balance(credit_card_balance_csv_file, previous_application_csv_file)
+
+
+def feature_extraction_installments_payments(installments_payments_csv_file, previous_application_csv_file):
+    """
+    :param installments_payments_csv_file: str, path of credit_card_balance csv file
+    :param previous_application_csv_file: str, path of previous_application csv file
+    :return: dataframe
+    """
+    return feature_extraction_POS_CASH_balance(installments_payments_csv_file, previous_application_csv_file)
+
+
