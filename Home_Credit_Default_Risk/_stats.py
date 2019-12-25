@@ -44,5 +44,18 @@ def corrwith(df, series):
 
 
 def mode(x):
-    return scipy.stats.mode(x)[0]
+    return scipy.stats.mode(x)[0][0]
+
+
+def mean_diff(x):
+    return x.sort_values().diff().mean()
+
+
+def var_diff(x):
+    return x.sort_values().diff().var()
+
+
+def range_diff(x):
+    diff = x.sort_values().diff()
+    return diff.max() - diff.min()
 
