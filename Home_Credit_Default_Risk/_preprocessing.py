@@ -259,11 +259,11 @@ def feature_extraction_bureau(csv_file):
     df = df.drop(["SK_ID_BUREAU"], axis=1)
 
     # some engineered features
-    # whether DPU over 1, 3, and 120 months
+    # whether DPD over 1, 3, and 6 months
     df["CREDIT_DAY_OVERDUE_OVER_0M"] = df["CREDIT_DAY_OVERDUE"] == 0
     df["CREDIT_DAY_OVERDUE_OVER_1M"] = df["CREDIT_DAY_OVERDUE"] > 30
     df["CREDIT_DAY_OVERDUE_OVER_3M"] = df["CREDIT_DAY_OVERDUE"] > 90
-    df["CREDIT_DAY_OVERDUE_OVER_6M"] = df["CREDIT_DAY_OVERDUE"] > 120
+    df["CREDIT_DAY_OVERDUE_OVER_6M"] = df["CREDIT_DAY_OVERDUE"] > 180
 
     df["DAYS_CREDIT_ENDDATE_POS"] = df["DAYS_CREDIT_ENDDATE"] > 0
 
