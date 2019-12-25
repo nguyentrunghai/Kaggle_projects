@@ -400,7 +400,7 @@ def feature_extraction_POS_CASH_balance(POS_CASH_balance_csv_file, previous_appl
     for col in count_cols:
         df_agg[col].fillna(0)
 
-    df_agg.drop(["SK_ID_BUREAU"], axis=1)
+    df_agg.drop(["SK_ID_PREV"], axis=1)
     print("Aggregate both numerical and categorical columns by SK_ID_CURR")
     df_agg = aggregate(df_agg, by=["SK_ID_CURR"], dtype="all",
                        num_stats=["count", "sum", "mean", np.var, "min", "max"],
