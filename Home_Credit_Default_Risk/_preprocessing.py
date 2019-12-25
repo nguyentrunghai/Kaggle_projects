@@ -363,8 +363,8 @@ def feature_extraction_previous_application(csv_file):
                        cat_stats=["sum", "mean"])
 
     # agg categorical columns with nunique and mode
-    print("Aggregate categorical columns with nunique and mode")
-    df_agg_1 = aggregate(df, by=["SK_ID_CURR"], dtype="cat", cat_stats=["nunique", mode], onehot_encode=False)
+    print("Aggregate categorical columns with nunique")
+    df_agg_1 = aggregate(df, by=["SK_ID_CURR"], dtype="cat", cat_stats=["nunique"], onehot_encode=False)
     df_agg = df_agg.merge(df_agg_1, how="outer", on="SK_ID_CURR")
 
     return df_agg
@@ -386,11 +386,12 @@ def feature_extraction_POS_CASH_balance(POS_CASH_balance_csv_file, previous_appl
 
     # agg numerical columns by SK_ID_PREV
     print("Aggregate numerical columns by SK_ID_PREV")
-    df_agg = aggregate(df, by=["SK_ID_PREV"], dtype="num",
-                       num_stats=["count", "sum", "mean", np.var, "min", "max"])
+    df_agg = aggregate(df, by=["SK_ID_PREV"], dtype="all",
+                       num_stats=["count", "sum", "mean", np.var, "min", "max"],
+                       cat_stats=["sum", "mean"])
 
-    print("Aggregate categorical columns by SK_ID_PREV with nunique and mode")
-    df_agg_1 = aggregate(df, by=["SK_ID_PREV"], dtype="cat", cat_stats=["nunique", mode], onehot_encode=False)
+    print("Aggregate categorical columns by SK_ID_PREV with nunique")
+    df_agg_1 = aggregate(df, by=["SK_ID_PREV"], dtype="cat", cat_stats=["nunique"], onehot_encode=False)
 
     df_agg = df_agg.merge(df_agg_1, how="outer", on="SK_ID_PREV")
 
