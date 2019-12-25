@@ -7,6 +7,7 @@ import numpy as np
 
 from sklearn.preprocessing import LabelEncoder
 
+from _stats import mode
 
 def flatten_multiindex_cols(columns):
     fat_cols = ["_".join([str(c) for c in flat_col]) for flat_col in columns.to_flat_index()]
@@ -223,6 +224,11 @@ class GeneralLabelEncoder:
 
 
 def feature_extraction_application(csv_file):
+    """
+    :param csv_file: str, path of application csv file
+    :return: dataframe
+    """
+    print("Extracting features from " + csv_file)
     df = pd.read_csv(csv_file)
     df = change_dtypes(df)
 
@@ -236,4 +242,25 @@ def feature_extraction_application(csv_file):
     df["CREDIT_TO_GOODS"] = df["AMT_CREDIT"] / df["AMT_GOODS_PRICE"]
 
     return df
+
+
+def feature_extraction_bureau(csv_file):
+    """
+    :param csv_file: str, path of bureau csv file
+    :return: dataframe
+    """
+    print("Extracting features from " + csv_file)
+    df = pd.read_csv(csv_file)
+    df = df.drop(["SK_ID_BUREAU"], axis=1)
+
+    # agg both numerical and categorical columns
+    df_agg = aggregate(df, by=["SK_ID_CURR"], dtype="all",
+                       num_stats=["count", "mean", np.var, "min", "max"],
+                       cat_stats=["sum", "mean"])
+
+    # agg categorical columns with nunique and mode
+    df_aag_1 = aggregate(df, by=["SK_ID_CURR"], dtype="cat", cat_stats=["nunique", mode], onehot_encode=False)
+
+    df_agg = df_agg.merge(df_aag_1, how="outer", on="SK_ID_CURR")
+    df_mode = aggregate(df, by=["SK_ID_CURR"], dtype="cat", cat_stats=[mode], onehot_encode=False)
 
