@@ -322,8 +322,9 @@ def feature_extraction_bureau_balance(bureau_balance_csv_file, bureau_csv_file):
 
     # agg both numerical columns by SK_ID_BUREAU
     print("Aggregate both numerical and categorical columns by SK_ID_BUREAU")
-    df_agg = aggregate(df, by=["SK_ID_BUREAU"], dtype="num",
-                       num_stats=["count", "sum", "mean", np.var, "min", "max"])
+    df_agg = aggregate(df, by=["SK_ID_BUREAU"], dtype="all",
+                       num_stats=["count", "sum", "mean", np.var, "min", "max"],
+                       cat_stats=["sum", "mean"])
 
     print("Aggregate categorical columns by SK_ID_BUREAU with stats nunique and mode")
     df_agg_1 = aggregate(df, by=["SK_ID_BUREAU"], dtype="cat", cat_stats=["nunique", mode], onehot_encode=False)
