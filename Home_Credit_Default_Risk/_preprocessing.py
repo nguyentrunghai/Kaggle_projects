@@ -332,12 +332,13 @@ def feature_extraction_bureau_balance(bureau_balance_csv_file, bureau_csv_file):
     df_agg = df_agg.merge(df_agg_1, how="outer", on="SK_ID_BUREAU")
 
     df_agg = id_cols.merge(df_agg, how="left", on="SK_ID_BUREAU")
+    df_agg = df_agg.drop(["SK_ID_BUREAU"], axis=1)
+
     count_cols = [col for col in df_agg.columns if col.split("_")[-1] in ["count", "sum", "nunique"]]
     print("Fillna these columns with zero:\n", count_cols)
     for col in count_cols:
-        df_agg[col].fillna(0)
+        df_agg[col] = df_agg[col].fillna(0)
 
-    df_agg.drop(["SK_ID_BUREAU"], axis=1)
     print("Aggregate both numerical and categorical columns by SK_ID_CURR")
     df_agg = aggregate(df_agg, by=["SK_ID_CURR"], dtype="all",
                        num_stats=["count", "sum", "mean", np.var, "min", "max"],
@@ -396,12 +397,13 @@ def feature_extraction_POS_CASH_balance(POS_CASH_balance_csv_file, previous_appl
     df_agg = df_agg.merge(df_agg_1, how="outer", on="SK_ID_PREV")
 
     df_agg = id_cols.merge(df_agg, how="left", on="SK_ID_PREV")
+    df_agg = df_agg.drop(["SK_ID_PREV"], axis=1)
+
     count_cols = [col for col in df_agg.columns if col.split("_")[-1] in ["count", "sum", "nunique"]]
     print("Fillna these columns with zero:\n", count_cols)
     for col in count_cols:
-        df_agg[col].fillna(0)
+        df_agg[col] = df_agg[col].fillna(0)
 
-    df_agg.drop(["SK_ID_PREV"], axis=1)
     print("Aggregate both numerical and categorical columns by SK_ID_CURR")
     df_agg = aggregate(df_agg, by=["SK_ID_CURR"], dtype="all",
                        num_stats=["count", "sum", "mean", np.var, "min", "max"],
