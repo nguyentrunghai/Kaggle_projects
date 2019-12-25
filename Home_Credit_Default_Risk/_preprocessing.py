@@ -100,8 +100,11 @@ def drop_collinear_columns(df, threshold):
     :param threshold: float, 0 <= threshold <= 1
     :return: dataframe
     """
-    df = df.select_dtypes(["number"])
-    corr_matr = df.corr().abs()
+    df_num = df.select_dtypes(["number"])
+    if df_num.shape[1] == 0:
+        return df
+    
+    corr_matr = df_num.corr().abs()
     upper_matr = corr_matr.where(np.triu(np.ones(corr_matr.shape), k=1).astype(np.bool))
     dropped_cols = [col for col in upper_matr.columns if (upper_matr[col] > threshold).any()]
     print("Drop %d collinear columns" % len(dropped_cols))
@@ -263,7 +266,6 @@ def feature_extraction_bureau(csv_file):
 
     df["DAYS_CREDIT_ENDDATE_POS"] = df["DAYS_CREDIT_ENDDATE"] > 0
 
-
     # agg both numerical and categorical columns
     print("Aggregate both numerical and categorical columns")
     df_agg = aggregate(df, by=["SK_ID_CURR"], dtype="all",
@@ -271,25 +273,35 @@ def feature_extraction_bureau(csv_file):
                        cat_stats=["sum", "mean"])
 
     # some more more engineered features
-    df_agg["DEBT_TO_CREDIT"] = df_agg["AMT_CREDIT_SUM_DEBT_sum"] / df_agg["AMT_CREDIT_SUM_sum"]
-    df_agg["OVERDUE_TO_DEBT"] = df_agg["AMT_CREDIT_SUM_OVERDUE_sum"] / df_agg["AMT_CREDIT_SUM_DEBT_sum"]
+    debt_to_credit = df_agg["AMT_CREDIT_SUM_DEBT_sum"] / df_agg["AMT_CREDIT_SUM_sum"]
+    d2c_min = debt_to_credit[debt_to_credit != -np.inf].min()
+    d2c_max = debt_to_credit[debt_to_credit != np.inf].max()
+    debt_to_credit = debt_to_credit.replace({np.inf: d2c_max, -np.inf: d2c_min})
+    df_agg["DEBT_TO_CREDIT"] = debt_to_credit
 
-    df_agg["DEBT_TO_CREDIT"] = df_agg["DEBT_TO_CREDIT"].replace({np.inf: np.nan, -np.inf: np.nan})
-    df_agg["OVERDUE_TO_DEBT"] = df_agg["OVERDUE_TO_DEBT"].replace({np.inf: np.nan, -np.inf: np.nan})
+    overdue_to_debt = df_agg["AMT_CREDIT_SUM_OVERDUE_sum"] / df_agg["AMT_CREDIT_SUM_DEBT_sum"]
+    o2d_min = overdue_to_debt[overdue_to_debt != -np.inf].min()
+    o2d_max = overdue_to_debt[overdue_to_debt != np.inf].max()
+    overdue_to_debt = overdue_to_debt.replace({np.inf: o2d_max, -np.inf: o2d_min})
+    df_agg["OVERDUE_TO_DEBT"] = overdue_to_debt
 
     # time between loans
     print("Aggregate DAYS_CREDIT with mean_diff, var_diff and range_diff")
     df_agg_1 = aggregate(df[["SK_ID_CURR", "DAYS_CREDIT"]], by=["SK_ID_CURR"], dtype="num",
                          num_stats=[mean_diff, var_diff, range_diff])
     for col in df_agg_1.columns:
-        df_agg_1[col] = df_agg_1[col].replace({np.inf: np.nan, -np.inf: np.nan})
+        tmp = df_agg_1[col]
+        tmp_min = tmp[tmp != -np.inf].min()
+        tmp_max = tmp[tmp != np.inf].max()
+        tmp = tmp.replace({np.inf: tmp_max, -np.inf: tmp_min})
+        df_agg_1[col] = tmp
     df_agg = df_agg.merge(df_agg_1, how="outer", on="SK_ID_CURR")
 
     # agg categorical columns with nunique
     print("Aggregate categorical columns with nunique")
     df_agg_2 = aggregate(df, by=["SK_ID_CURR"], dtype="cat", cat_stats=["nunique"], onehot_encode=False)
-
     df_agg = df_agg.merge(df_agg_2, how="outer", on="SK_ID_CURR")
+
     return df_agg
 
 
