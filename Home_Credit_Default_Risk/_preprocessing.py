@@ -483,5 +483,6 @@ def merge_tables(main_csv_file, on="SK_ID_CURR", other_csv_files=None, prefixes=
         for col in count_cols:
             df[col] = df[col].fillna(0)
 
+    df = change_dtypes(df)
     return df
 
