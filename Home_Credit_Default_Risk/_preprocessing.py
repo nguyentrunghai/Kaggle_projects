@@ -154,6 +154,7 @@ def onehot_encoding(X_train, X_test):
     return X_train_ohe, X_test_ohe
 
 
+# TODO: fix error when test have class which has not been seen in train.
 class GeneralLabelEncoder:
     """
     sklearn LabelEncoder accepts only 1D array or pd Series.
