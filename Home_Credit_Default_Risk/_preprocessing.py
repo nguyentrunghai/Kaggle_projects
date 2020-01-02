@@ -6,6 +6,7 @@ import pandas as pd
 import numpy as np
 
 from sklearn.preprocessing import LabelEncoder
+from sklearn.base import BaseEstimator, TransformerMixin
 
 from _stats import mode
 from _stats import mean_diff, var_diff, range_diff
@@ -155,11 +156,13 @@ def onehot_encoding(X_train, X_test):
 
 
 # TODO: fix error when test have class which has not been seen in train.
-class GeneralLabelEncoder:
+class GeneralLabelEncoder(BaseEstimator, TransformerMixin):
     """
     sklearn LabelEncoder accepts only 1D array or pd Series.
     This class wraps around sklearn LabelEncoder and can handle a 2d array of categoricals
     or a dataframe of mixed types both numeric and categorical
+    TransformerMixin gives us the method fit_transform()
+    BaseEstimator gives us methods get_params() and set_params()
     """
     def __init__(self, fillna_value="NaN"):
         self._fillna_value = fillna_value
@@ -226,9 +229,10 @@ class GeneralLabelEncoder:
 
         return encoded_x
 
-    def fit_transform(self, x):
-        self.fit(x)
-        return self.transform(x)
+    # no need because of TransformerMixin
+    #def fit_transform(self, x):
+    #    self.fit(x)
+    #    return self.transform(x)
 
 
 def feature_extraction_application(csv_file):
