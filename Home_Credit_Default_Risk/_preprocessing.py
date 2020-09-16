@@ -128,7 +128,7 @@ def change_dtypes(df):
         if (df[col].dtype == "object") and (df[col].nunique() < df.shape[0]):
             df[col] = df[col].astype("category")
 
-        elif len(df[col].unique()) == 2:
+        elif set(df[col].unique()) == set([0, 1]):
             df[col] = df[col].astype(bool)
 
         elif df[col].dtype == float:
